@@ -1,65 +1,109 @@
-import Image from "next/image";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
-export default function Home() {
+type NoticeRow = {
+  id: string;
+  caseNumber: string | null;
+  type: string | null;
+  status: "received" | "parsing" | "needs_review" | "routed" | "suspicious" | "failed";
+  receivedAt: string;
+};
+
+const STATUS_LABEL: Record<NoticeRow["status"], string> = {
+  received: "Received",
+  parsing: "Parsing",
+  needs_review: "Needs review",
+  routed: "Routed",
+  suspicious: "Suspicious",
+  failed: "Failed",
+};
+
+const STATUS_VARIANT: Record<NoticeRow["status"], "default" | "secondary" | "destructive" | "outline"> = {
+  received: "secondary",
+  parsing: "secondary",
+  needs_review: "default",
+  routed: "outline",
+  suspicious: "destructive",
+  failed: "destructive",
+};
+
+async function getNotices(): Promise<NoticeRow[]> {
+  // Day 1: empty state. DB wiring lands in Day 2 once DATABASE_URL is set.
+  return [];
+}
+
+export default async function InboxPage() {
+  const notices = await getNotices();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex-1 px-8 py-8 max-w-6xl">
+      <header className="flex items-center justify-between pb-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Notice Inbox</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Forwarded PACER / CM-ECF notices, classified and routed.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <Link href="/upload" className={buttonVariants()}>
+          Upload notice
+        </Link>
+      </header>
+
+      {notices.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 flex flex-col items-center text-center gap-3">
+            <div className="text-base font-medium">No notices yet</div>
+            <div className="text-sm text-muted-foreground max-w-md">
+              Upload a forwarded court notice PDF to see it ingested, validated,
+              classified, and routed to a case.
+            </div>
+            <Link href="/upload" className={`${buttonVariants()} mt-2`}>
+              Upload your first notice
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[180px]">Case</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Received</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {notices.map((n) => (
+                <TableRow key={n.id}>
+                  <TableCell className="font-mono text-xs">
+                    {n.caseNumber ?? "—"}
+                  </TableCell>
+                  <TableCell>{n.type ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant={STATUS_VARIANT[n.status]}>
+                      {STATUS_LABEL[n.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right text-xs text-muted-foreground">
+                    {n.receivedAt}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }
