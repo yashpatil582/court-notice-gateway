@@ -2,6 +2,7 @@ import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
+
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -55,17 +56,33 @@ function fmtTimestamp(ts: Date | string): string {
   });
 }
 
+function fmtHearing(ts: Date | string | null): string {
+  if (!ts) return "—";
+  const d = typeof ts === "string" ? new Date(ts) : ts;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
 async function getNotices() {
   return db
     .select({
       id: schema.notices.id,
       type: schema.notices.type,
       status: schema.notices.status,
+      confidence: schema.notices.confidence,
       receivedAt: schema.notices.receivedAt,
       caseNumber: schema.cases.caseNumber,
+      hearingAt: schema.extractedEvents.hearingAt,
     })
     .from(schema.notices)
     .leftJoin(schema.cases, eq(schema.notices.caseId, schema.cases.id))
+    .leftJoin(schema.extractedEvents, eq(schema.extractedEvents.noticeId, schema.notices.id))
     .orderBy(desc(schema.notices.receivedAt))
     .limit(100);
 }
@@ -74,7 +91,7 @@ export default async function InboxPage() {
   const notices = await getNotices();
 
   return (
-    <div className="flex-1 px-8 py-8 max-w-6xl">
+    <div className="flex-1 px-8 py-8 max-w-7xl">
       <header className="flex items-center justify-between pb-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Notice Inbox</h1>
@@ -105,9 +122,11 @@ export default async function InboxPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[180px]">Case</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-[150px]">Case</TableHead>
+                <TableHead className="w-[150px]">Type</TableHead>
+                <TableHead className="w-[140px]">Status</TableHead>
+                <TableHead className="w-[110px]">Conf.</TableHead>
+                <TableHead>Hearing</TableHead>
                 <TableHead className="text-right">Received</TableHead>
               </TableRow>
             </TableHeader>
@@ -117,11 +136,19 @@ export default async function InboxPage() {
                   <TableCell className="font-mono text-xs">
                     {n.caseNumber ?? "—"}
                   </TableCell>
-                  <TableCell>{n.type ? TYPE_LABEL[n.type] ?? n.type : "—"}</TableCell>
+                  <TableCell className="text-sm">
+                    {n.type ? TYPE_LABEL[n.type] ?? n.type : "—"}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={STATUS_VARIANT[n.status as StatusKey]}>
                       {STATUS_LABEL[n.status as StatusKey]}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs font-mono text-muted-foreground">
+                    {n.confidence != null ? `${Math.round(n.confidence * 100)}%` : "—"}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {fmtHearing(n.hearingAt)}
                   </TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground">
                     {fmtTimestamp(n.receivedAt)}

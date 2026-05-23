@@ -5,6 +5,7 @@
  *
  * Run: `pnpm db:seed`
  */
+import './_loadenv';
 import { db, schema } from '../src/db';
 import { sql } from 'drizzle-orm';
 

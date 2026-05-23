@@ -3,9 +3,8 @@
 import { put } from '@vercel/blob';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { db, schema } from '@/db';
-import { analyseNotice, extractPdfText } from '@/lib/parsing';
-import { findOrCreateCase } from '@/lib/case-lookup';
+import { extractPdfText } from '@/lib/parsing';
+import { ingestNotice } from '@/lib/notice-pipeline/run';
 
 export type UploadResult = { ok: false; error: string };
 
@@ -21,7 +20,6 @@ export async function uploadNotice(_prev: UploadResult | null, formData: FormDat
     return { ok: false, error: 'Max upload size is 10MB.' };
   }
 
-  let noticeId: string;
   try {
     const buffer = await file.arrayBuffer();
 
@@ -30,42 +28,16 @@ export async function uploadNotice(_prev: UploadResult | null, formData: FormDat
       addRandomSuffix: true,
     });
 
-    const { text, pageCount, requiresOcr } = await extractPdfText(buffer);
-    const analysis = analyseNotice({ text, senderEmail: null });
+    const { text } = await extractPdfText(buffer);
 
-    const caseId = analysis.caseNumber ? await findOrCreateCase(analysis.caseNumber) : null;
-
-    const [notice] = await db
-      .insert(schema.notices)
-      .values({
-        caseId,
-        source: 'pdf',
-        status: analysis.verdict === 'suspicious' ? 'suspicious' : 'received',
-        rawText: text,
-        rawFileUrl: blob.url,
-      })
-      .returning({ id: schema.notices.id });
-
-    noticeId = notice.id;
-
-    await db.insert(schema.auditEvents).values({
-      entity: 'notice',
-      entityId: notice.id,
-      actor: 'system',
-      action: 'ingested',
-      after: {
-        verdict: analysis.verdict,
-        caseNumber: analysis.caseNumber?.caseNumber ?? null,
-        proceeding: analysis.caseNumber?.proceeding ?? null,
-        pageCount,
-        requiresOcr,
-        linkCount: analysis.links.links.length,
-        linkOverall: analysis.links.overall,
-        reasons: analysis.reasons,
-      },
+    await ingestNotice({
+      text,
+      rawFileUrl: blob.url,
+      senderEmail: null,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error during upload';
+    console.error('Upload failed:', err);
     return { ok: false, error: message };
   }
 
