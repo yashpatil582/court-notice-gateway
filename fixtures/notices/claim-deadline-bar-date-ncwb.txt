@@ -1,0 +1,27 @@
+From: noreply@bnc-mail.com
+To: paralegal@firm.example
+Subject: 25-50901 Notice of Bar Date for Filing Proofs of Claim
+
+UNITED STATES BANKRUPTCY COURT
+WESTERN DISTRICT OF NORTH CAROLINA — CHARLOTTE DIVISION
+
+In re: Greenleaf Manufacturing, Inc.              Case No. 3:25-bk-50901-JCW
+Debtor                                            Chapter 11
+
+NOTICE OF BAR DATE FOR FILING PROOFS OF CLAIM
+
+The Court has entered an Order setting the deadline by which all
+creditors must file proofs of claim against the debtor's estate.
+
+GENERAL BAR DATE: July 31, 2026 at 4:00 PM Eastern
+GOVERNMENTAL UNIT BAR DATE: October 17, 2026 at 4:00 PM Eastern
+
+Claims may be filed electronically at: https://ecf.ncwb.uscourts.gov/
+Or via the Bankruptcy Noticing Center: https://noticingcenter.com/proof-of-claim
+
+A proof of claim form (Official Form 410) may be obtained from
+https://www.uscourts.gov/forms/B410.pdf
+
+Failure to file a timely proof of claim may result in disallowance of
+your claim and the loss of your right to vote on, or receive a
+distribution under, any plan of reorganization.

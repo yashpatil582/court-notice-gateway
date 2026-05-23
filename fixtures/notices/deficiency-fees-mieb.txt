@@ -1,0 +1,25 @@
+From: ecf_notice@mieb.uscourts.gov
+To: paralegal@firm.example
+Subject: 25-41229 Notice of Deficient Filing Fee
+
+UNITED STATES BANKRUPTCY COURT
+EASTERN DISTRICT OF MICHIGAN — DETROIT
+
+In re: Thomas P. O'Brien                         Case No. 2:25-bk-41229-MAR
+Debtor                                           Chapter 7
+
+NOTICE OF DEFICIENT FILING FEE
+
+The debtor has filed the above-captioned case but the required filing fee
+of $338.00 has not been paid in full. Of that amount, $0.00 has been
+received; a balance of $338.00 remains due.
+
+Pursuant to Fed. R. Bankr. P. 1006, the debtor must EITHER:
+  (a) pay the balance in full on or before May 30, 2026; OR
+  (b) file an Application to Pay Filing Fee in Installments (Form 103A);
+      OR
+  (c) file an Application for Waiver of the Chapter 7 Filing Fee (Form 103B).
+
+Failure to comply may result in dismissal of the case without further notice.
+
+https://ecf.mieb.uscourts.gov/cgi-bin/Dispatch.pl?412290

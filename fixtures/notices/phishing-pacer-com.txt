@@ -1,0 +1,19 @@
+From: filings@pacer.com
+To: paralegal@firm.example
+Subject: ATTENTION: Case 25-66677 - PACER Account Verification Required
+
+PACER FILE DELIVERY SERVICE
+
+Dear Attorney,
+
+We have detected unusual activity on your PACER account in connection with
+case 25-66677. To prevent suspension of your access, please verify your
+credentials immediately using the secure link below:
+
+  Verify Now: http://pacer.com/account/verify?ref=25-66677
+
+You have 24 hours to complete this verification. Failure to verify will
+result in temporary suspension of your account and the inability to file
+documents electronically.
+
+— PACER Operations Team

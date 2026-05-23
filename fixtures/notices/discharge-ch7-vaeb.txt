@@ -1,0 +1,25 @@
+From: ecf_notice@vaeb.uscourts.gov
+To: paralegal@firm.example
+Subject: 25-72018 Discharge of Joint Debtors
+
+UNITED STATES BANKRUPTCY COURT
+EASTERN DISTRICT OF VIRGINIA — RICHMOND DIVISION
+
+In re: Reginald M. Thompson                     Case No. 3:25-bk-72018-KLP
+       and Caroline B. Thompson                  Joint Debtors
+                                                 Chapter 7
+
+DISCHARGE OF JOINT DEBTORS
+
+It appearing that the debtors are entitled to discharges, IT IS ORDERED:
+    Each debtor is granted a discharge under 11 U.S.C. § 727.
+
+Order entered: April 28, 2026.
+Hon. Keith L. Phillips, U.S. Bankruptcy Judge.
+
+EXPLANATION OF BANKRUPTCY DISCHARGE
+Some debts are not discharged: most taxes, most student loans, debts for
+fraud, embezzlement, larceny, willful and malicious injury, domestic support
+obligations.
+
+https://ecf.vaeb.uscourts.gov/cgi-bin/Dispatch.pl?720185

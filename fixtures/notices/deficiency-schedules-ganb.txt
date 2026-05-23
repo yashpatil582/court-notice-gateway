@@ -1,0 +1,25 @@
+From: ecf_notice@ganb.uscourts.gov
+To: paralegal@firm.example
+Subject: 25-55104 NOTICE OF DEFICIENT FILING — Missing Schedules
+
+UNITED STATES BANKRUPTCY COURT
+NORTHERN DISTRICT OF GEORGIA — ATLANTA DIVISION
+
+In re: Ayanna E. Williams                        Case No. 1:25-bk-55104-LTM
+Debtor                                           Chapter 7
+
+NOTICE OF DEFICIENT FILING
+
+The petition filed on May 03, 2026 is deficient as follows:
+
+  • Schedule A/B (Property) is missing.
+  • Schedule J (Your Expenses) is missing.
+  • Statement of Financial Affairs (Form 107) is missing.
+  • Means Test (Form 122A-1) is missing.
+
+REQUIRED ACTION: cure the deficiencies on or before May 17, 2026, or the
+case will be DISMISSED WITHOUT FURTHER NOTICE pursuant to Local Rule 1007-1.
+
+For docket access: https://ecf.ganb.uscourts.gov/cgi-bin/Dispatch.pl?551041
+
+Clerk of the Court

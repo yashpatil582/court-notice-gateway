@@ -14,6 +14,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/db-reset.ts",
     "e2e": "tsx scripts/e2e-upload.ts",
+    "eval": "tsx eval/run-eval.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

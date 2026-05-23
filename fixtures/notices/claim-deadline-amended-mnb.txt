@@ -1,0 +1,23 @@
+From: ecf_notice@mnb.uscourts.gov
+To: paralegal@firm.example
+Subject: 24-32189 AMENDED Notice of Last Day to File Claims
+
+UNITED STATES BANKRUPTCY COURT
+DISTRICT OF MINNESOTA — MINNEAPOLIS
+
+In re: Anders Karlsson and Linnea Karlsson         Case No. 0:24-bk-32189-WJF
+Joint Debtors                                      Chapter 13
+
+AMENDED NOTICE OF LAST DAY TO FILE PROOFS OF CLAIM
+
+Pursuant to Fed. R. Bankr. P. 3002(c)(6) and the Court's Order dated
+May 02, 2026, the deadline for filing proofs of claim is AMENDED.
+
+NEW DEADLINE: June 30, 2026 at 11:59 PM Central
+(prior deadline was June 16, 2026)
+
+Governmental units must file proofs of claim by October 09, 2026.
+
+This Amended Notice supersedes the prior notice docketed April 18, 2026.
+
+Docket: https://ecf.mnb.uscourts.gov/cgi-bin/Dispatch.pl?321890

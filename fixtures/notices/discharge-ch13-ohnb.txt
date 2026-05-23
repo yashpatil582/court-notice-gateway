@@ -1,0 +1,26 @@
+From: noreply@bnc-mail.com
+To: paralegal@firm.example
+Subject: 22-13456 Order of Discharge — Chapter 13
+
+UNITED STATES BANKRUPTCY COURT
+NORTHERN DISTRICT OF OHIO — CLEVELAND DIVISION
+
+In re: Brianna L. Akin                           Case No. 1:22-bk-13456-AIH
+Debtor                                           Chapter 13
+
+ORDER OF DISCHARGE
+
+The debtor has completed all payments under the confirmed Chapter 13 plan.
+IT IS ORDERED that the debtor is granted a discharge under 11 U.S.C. § 1328(a).
+
+Order entered: May 14, 2026
+Honorable Arthur I. Harris, U.S. Bankruptcy Judge
+
+EXPLANATION OF BANKRUPTCY DISCHARGE
+This court order discharges the debtor from most pre-petition debts. Some
+debts are NOT discharged in Chapter 13. Examples: certain long-term debts,
+domestic support obligations, restitution from criminal conviction, and
+debts for personal injury caused by intoxicated driving.
+
+Docket: https://ecf.ohnb.uscourts.gov/cgi-bin/Dispatch.pl?134560
+BNC: https://noticingcenter.com/n/ohnb-22-13456

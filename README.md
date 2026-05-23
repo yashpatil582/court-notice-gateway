@@ -12,17 +12,37 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 
 ## Status
 
-**Day 1 of 7 — scaffolding complete.**
+**Day 5 of 7 — eval harness in place; 20 synthetic fixtures landing at 100% case match, 100% classification, 94.3% macro-F1 on field extraction.**
 
-- [x] Next.js 16 + TypeScript + Tailwind 4 + shadcn/ui
-- [x] Drizzle ORM schema (Case, Notice, ParseRun, ExtractedEvent, Task, ReviewDecision, AuditEvent, SenderPolicy)
-- [x] Nav shell + empty Notice Inbox / Review / Cases / Metrics screens
-- [ ] PDF ingest + deterministic checks (Day 2)
-- [ ] Groq classification + extraction (Day 3)
-- [ ] Side-by-side review UI + audit log (Day 4)
-- [ ] Eval harness with reproducible metrics (Day 5)
-- [ ] Phishing heuristics + remaining notice types + MCP server (Day 6)
-- [ ] Metrics dashboard + ICS export + Loom walkthrough (Day 7)
+- [x] Next.js 16 + TypeScript + Tailwind 4 + shadcn/ui (Day 1)
+- [x] Drizzle ORM schema (10 tables / 6 enums) (Day 1)
+- [x] Deterministic parsing layer — case number, sender allowlist, link host validation (Day 2)
+- [x] PDF upload → Vercel Blob → unpdf → deterministic → DB write (Day 2)
+- [x] Groq classification + extraction via tool-use, with confidence aggregation (Day 3)
+- [x] Side-by-side review UI: PDF + editable fields with confidence bars + audit log (Day 4)
+- [x] Approve/Reject/Save actions; auto-generates a follow-up Task on approve (Day 4)
+- [x] Case timeline page; Review Queue page (Day 4)
+- [x] **Eval harness with reproducible metrics → [eval-results.md](./eval-results.md)** (Day 5)
+- [ ] Phishing heuristics tuning + MCP server (Day 6)
+- [ ] Metrics dashboard + ICS export + Loom walkthrough + deploy (Day 7)
+
+## Eval at a glance
+
+20 synthetic fixtures (16 legit across all 6 notice types, 4 phishing variants):
+
+| Metric | Result | Target |
+| --- | ---: | ---: |
+| Case-number match accuracy | 100% | ≥ 98% |
+| Notice-type classification accuracy | 100% | ≥ 90% |
+| Phishing detection recall | 100% | ≥ 95% |
+| Phishing false-positive rate | 0% | ≤ 5% |
+| Straight-through rate (legit → auto-routed) | 100% | ≥ 60% |
+| Field extraction macro-F1 | 94.3% | ≥ 85% |
+| Median ingest latency (LLM stages) | 9.8s | < 8s |
+
+Full per-fixture breakdown and per-field precision/recall in [eval-results.md](./eval-results.md). Reproduce with `pnpm eval`.
+
+> The eval set is synthetic but modeled on official forms (309A, 122A, B 318, etc.). Real PACER / BNC samples need to be added before any external claim — the README will be updated when that happens.
 
 ## Stack and why
 
@@ -32,25 +52,37 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 | UI | Tailwind 4 + shadcn/ui | Considered defaults, no design tokens to invent |
 | DB | Postgres on Neon | Free tier, serverless-friendly |
 | ORM | Drizzle | Type-safe, no codegen friction |
-| LLM | Groq `llama-3.3-70b-versatile` (tool-use) | Free tier, sub-second latency, open-weight Llama. Provider-abstracted via `lib/llm.ts` so Anthropic / OpenAI / self-hosted swap is one line. |
-| MCP | `@modelcontextprotocol/sdk` | Open protocol; Claude Desktop (free) is the demo client |
+| LLM | Groq `llama-3.3-70b-versatile` (tool-use) | Free tier, low latency, open-weight Llama. Provider-abstracted via `src/lib/llm/` so Anthropic / OpenAI / self-hosted swap is a one-file change. |
+| File storage | Vercel Blob (private) | Free tier; PDFs proxied through `/api/notices/[id]/pdf` so tokens stay server-side |
+| MCP | `@modelcontextprotocol/sdk` (Day 6) | Open protocol; Claude Desktop is the demo client |
 | Deploy | Vercel + Neon + Groq | $0 to run |
 
 **Design principles:**
 - Deterministic rules first (case number regex, sender allowlist, link host validation). LLM only for classification and extraction.
-- Every parse run + every human edit is written to an audit log.
-- Low-confidence extractions never auto-route — they sit in a Review Queue.
+- Suspicious notices short-circuit the LLM entirely — saves tokens, hardens the trust boundary.
+- Every parse run + every reviewer edit is written to an audit log (`audit_events` table).
+- Low-confidence extractions never auto-route — they sit in a Review Queue with confidence bars per field.
 
 ## Run locally
 
 ```bash
 pnpm install
-cp .env.local.example .env.local   # fill in DATABASE_URL and GROQ_API_KEY
+cp .env.local.example .env.local   # fill in DATABASE_URL, GROQ_API_KEY, BLOB_READ_WRITE_TOKEN
 pnpm db:push                       # apply schema to Neon
-pnpm dev
+pnpm db:seed                       # seed SenderPolicy with known court domains
+pnpm dev                           # → http://localhost:3000
 ```
 
-Open <http://localhost:3000>.
+### Useful scripts
+
+```bash
+pnpm test                          # vitest — deterministic layer unit tests
+pnpm eval                          # full pipeline eval against fixtures → eval-results.md
+pnpm e2e                           # smoke-test ingest end-to-end against the real DB + Groq
+pnpm tsx scripts/fixtures-to-pdf.ts  # regenerate PDF fixtures from .txt sources
+pnpm db:reset                      # truncate notices/cases/tasks (keeps sender policies)
+pnpm db:studio                     # Drizzle Studio
+```
 
 ### Required environment variables
 
@@ -59,6 +91,7 @@ Open <http://localhost:3000>.
 | `DATABASE_URL` | Postgres connection string | <https://neon.tech> |
 | `GROQ_API_KEY` | LLM provider key | <https://console.groq.com/keys> |
 | `BLOB_READ_WRITE_TOKEN` | File storage for PDFs | Vercel Blob (free tier) |
+| `REVIEW_CONFIDENCE_THRESHOLD` | Below this, notices go to needs_review (default 0.75) | — |
 
 ## Non-goals (explicit)
 
@@ -72,15 +105,25 @@ Open <http://localhost:3000>.
 
 ```
 src/
-  app/                  # App Router pages (Inbox, Review, Cases, Metrics, Upload)
-  components/ui/        # shadcn primitives
-  db/
-    schema.ts           # Drizzle schema (10 tables, 6 enums)
-    index.ts            # postgres-js client
-  lib/                  # utilities (llm.ts, parsing, deterministic checks)
-drizzle/                # generated SQL migrations
-fixtures/               # public sample notices + synthetic variants (added Day 5)
-scripts/                # seed, eval runner
+  app/
+    page.tsx                       # Notice Inbox
+    upload/                        # Upload form + server action
+    notices/[id]/                  # Side-by-side review page + actions
+    cases/[caseNumber]/            # Case timeline
+    review/                        # Review Queue list
+    api/notices/[id]/pdf/          # Private blob proxy route
+  components/ui/                   # shadcn primitives
+  db/                              # Drizzle schema + client
+  lib/
+    parsing/                       # Deterministic stage (case number, sender, links, pdf)
+    llm/                           # Provider-abstracted tool-use wrapper (Groq today)
+    notice-pipeline/               # classify + extract + orchestrator
+    case-lookup.ts                 # find-or-create Case helper
+eval/
+  labels.ts                        # Ground-truth labels per fixture
+  run-eval.ts                      # Eval harness; pnpm eval → eval-results.md
+fixtures/notices/                  # 20 synthetic notices (.txt sources, .pdf generated)
+scripts/                           # seed, reset, e2e, smoke, _loadenv
 ```
 
 ## Credits

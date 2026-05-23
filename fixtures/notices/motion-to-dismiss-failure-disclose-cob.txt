@@ -1,0 +1,27 @@
+From: ecf_notice@cob.uscourts.gov
+To: paralegal@firm.example
+Subject: 24-58221 Motion to Dismiss — § 707(b)
+
+UNITED STATES BANKRUPTCY COURT
+DISTRICT OF COLORADO
+
+In re: Veronica J. Hartley                        Case No. 1:24-bk-58221-MER
+Debtor                                            Chapter 7
+
+UNITED STATES TRUSTEE'S MOTION TO DISMISS CASE UNDER 11 U.S.C. § 707(b)(3)
+
+The United States Trustee moves to dismiss this case as an abuse of Chapter
+7 under § 707(b)(3) based on the totality of the debtor's financial
+circumstances. The motion alleges the debtor failed to disclose ownership
+interests in two LLCs and a 2022 settlement award in the Statement of
+Financial Affairs.
+
+Hearing:
+    Date: June 02, 2026
+    Time: 1:30 p.m. Mountain Time
+    Hon. Michael E. Romero, Courtroom B
+    United States Custom House, 721 19th Street, Denver, CO
+
+Response deadline: May 26, 2026 at 5:00 p.m.
+
+https://ecf.cob.uscourts.gov/cgi-bin/Dispatch.pl?582215

@@ -1,0 +1,16 @@
+From: court.clerk.notification@gmail.com
+To: paralegal@firm.example
+Subject: Urgent — Case 25-99012 Court Filing Notification
+
+UNITED STATES BANKRUPTCY COURT NOTIFICATION SYSTEM
+
+A new filing has been entered in your case 25-99012. Due to system
+upgrades, court notifications are now being delivered from an external
+notification service.
+
+Please review the attached order by clicking here:
+  http://secure-court-filings.click/d/25-99012/order
+
+If you have any questions, contact the clerk at the above email address.
+
+This message is automated. Do not reply.
