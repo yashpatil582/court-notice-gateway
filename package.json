@@ -15,11 +15,13 @@
     "db:reset": "tsx scripts/db-reset.ts",
     "e2e": "tsx scripts/e2e-upload.ts",
     "eval": "tsx eval/run-eval.ts",
+    "mcp": "tsx mcp/server.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@vercel/blob": "^2.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

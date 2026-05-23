@@ -6,5 +6,7 @@
  * CLI scripts in line with how the app sees env at runtime.
  */
 import { config } from 'dotenv';
-config({ path: '.env.local', override: true });
-config({ path: '.env' });
+// quiet: true keeps stdout clean — required because the MCP server writes
+// JSON-RPC frames to stdout. Any non-JSON line breaks the client.
+config({ path: '.env.local', override: true, quiet: true });
+config({ path: '.env', quiet: true });

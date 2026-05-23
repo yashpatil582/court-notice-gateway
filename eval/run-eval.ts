@@ -15,8 +15,7 @@ import '../scripts/_loadenv';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { analyseNotice } from '../src/lib/parsing';
-import { classifyNotice, NOTICE_TYPES, type NoticeType } from '../src/lib/notice-pipeline/classify';
-import { extractNoticeFields, aggregateConfidence } from '../src/lib/notice-pipeline/extract';
+import { analyseNoticeLlm, aggregateConfidence, NOTICE_TYPES, type NoticeType } from '../src/lib/notice-pipeline/analyse';
 import { LABELS, type ExpectedFields } from './labels';
 
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures', 'notices');
@@ -142,25 +141,20 @@ async function evalFixture(stem: string, content: string): Promise<PerFixtureRow
   }
 
   try {
-    const classify = await classifyNotice(content);
-    const extract = await extractNoticeFields(content, classify.data.type);
+    const llm = await analyseNoticeLlm(content);
 
-    row.observedType = classify.data.type;
-    row.classifyConfidence = classify.data.confidence;
-    row.typeMatch = label.expectedType !== null && classify.data.type === label.expectedType;
-    row.overallConfidence = aggregateConfidence(
-      extract.data,
-      row.caseMatch,
-      classify.data.confidence,
-    );
+    row.observedType = llm.data.type;
+    row.classifyConfidence = llm.data.classifyConfidence;
+    row.typeMatch = label.expectedType !== null && llm.data.type === label.expectedType;
+    row.overallConfidence = aggregateConfidence(llm.data, row.caseMatch);
     row.observedStatus =
-      row.overallConfidence >= REVIEW_THRESHOLD && classify.data.type !== 'unknown'
+      row.overallConfidence >= REVIEW_THRESHOLD && llm.data.type !== 'unknown'
         ? 'routed'
         : 'needs_review';
     row.statusMatch = row.observedStatus === label.expectedStatus;
 
     for (const f of FIELD_NAMES) {
-      row.fieldHits[f] = evalField(f, label.expectedFields[f], (extract.data as Record<FieldName, string | null>)[f]);
+      row.fieldHits[f] = evalField(f, label.expectedFields[f], (llm.data as Record<FieldName, string | null>)[f]);
     }
   } catch (err) {
     row.errors.push(err instanceof Error ? err.message : String(err));

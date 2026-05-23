@@ -12,7 +12,7 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 
 ## Status
 
-**Day 5 of 7 — eval harness in place; 20 synthetic fixtures landing at 100% case match, 100% classification, 94.3% macro-F1 on field extraction.**
+**Day 6 of 7 — MCP server live, latency cut from 9.8s → 2.6s, eval all-green.**
 
 - [x] Next.js 16 + TypeScript + Tailwind 4 + shadcn/ui (Day 1)
 - [x] Drizzle ORM schema (10 tables / 6 enums) (Day 1)
@@ -22,9 +22,10 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 - [x] Side-by-side review UI: PDF + editable fields with confidence bars + audit log (Day 4)
 - [x] Approve/Reject/Save actions; auto-generates a follow-up Task on approve (Day 4)
 - [x] Case timeline page; Review Queue page (Day 4)
-- [x] **Eval harness with reproducible metrics → [eval-results.md](./eval-results.md)** (Day 5)
-- [ ] Phishing heuristics tuning + MCP server (Day 6)
-- [ ] Metrics dashboard + ICS export + Loom walkthrough + deploy (Day 7)
+- [x] Eval harness with reproducible metrics → [eval-results.md](./eval-results.md) (Day 5)
+- [x] **Combined classify+extract into single LLM call — 73% latency reduction** (Day 6)
+- [x] **MCP server (stdio) with 4 read-only tools — connectable from Claude Desktop** (Day 6)
+- [ ] ICS calendar export + Loom walkthrough + Vercel deploy (Day 7)
 
 ## Eval at a glance
 
@@ -38,7 +39,7 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 | Phishing false-positive rate | 0% | ≤ 5% |
 | Straight-through rate (legit → auto-routed) | 100% | ≥ 60% |
 | Field extraction macro-F1 | 94.3% | ≥ 85% |
-| Median ingest latency (LLM stages) | 9.8s | < 8s |
+| Median ingest latency (single LLM call) | 2.6s | < 8s |
 
 Full per-fixture breakdown and per-field precision/recall in [eval-results.md](./eval-results.md). Reproduce with `pnpm eval`.
 
@@ -79,6 +80,8 @@ pnpm dev                           # → http://localhost:3000
 pnpm test                          # vitest — deterministic layer unit tests
 pnpm eval                          # full pipeline eval against fixtures → eval-results.md
 pnpm e2e                           # smoke-test ingest end-to-end against the real DB + Groq
+pnpm mcp                           # run the MCP server (stdio) for Claude Desktop
+pnpm tsx scripts/mcp-smoke.ts      # exercise all 4 MCP tools end-to-end
 pnpm tsx scripts/fixtures-to-pdf.ts  # regenerate PDF fixtures from .txt sources
 pnpm db:reset                      # truncate notices/cases/tasks (keeps sender policies)
 pnpm db:studio                     # Drizzle Studio
@@ -92,6 +95,57 @@ pnpm db:studio                     # Drizzle Studio
 | `GROQ_API_KEY` | LLM provider key | <https://console.groq.com/keys> |
 | `BLOB_READ_WRITE_TOKEN` | File storage for PDFs | Vercel Blob (free tier) |
 | `REVIEW_CONFIDENCE_THRESHOLD` | Below this, notices go to needs_review (default 0.75) | — |
+
+## MCP server (Claude Desktop / ChatGPT)
+
+The gateway ships an MCP server (stdio transport) that lets any MCP-aware AI client query the live notice/case/task state. Four read-only tools:
+
+| Tool | Returns |
+|---|---|
+| `list_upcoming_hearings({ withinDays? })` | Scheduled 341 meetings + motion hearings + virtual links |
+| `get_case_notice_timeline({ caseNumber })` | Every notice + extracted event + task on a case |
+| `find_unreviewed_notices({ olderThanHours? })` | Whatever is still sitting in the Review Queue |
+| `summarise_recent_discharge_orders({ sinceDate })` | Discharge orders since the given date |
+
+### Connect from Claude Desktop
+
+1. Make sure `pnpm install` and `pnpm db:push` have been run, and `.env.local` is filled in.
+2. Open `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+3. Add this entry (substitute the absolute path):
+
+   ```json
+   {
+     "mcpServers": {
+       "court-notice-gateway": {
+         "command": "pnpm",
+         "args": [
+           "--silent",
+           "--dir",
+           "/absolute/path/to/court-notice-gateway",
+           "mcp"
+         ]
+       }
+     }
+   }
+   ```
+
+4. Restart Claude Desktop. The four tools will appear under the 🔌 icon.
+
+### Example prompts
+
+> _"List every bankruptcy hearing in the next 30 days, sorted by date."_
+>
+> _"Show me the case timeline for 25-12345 — what's open?"_
+>
+> _"Which notices have been sitting in the Review Queue for more than 12 hours?"_
+
+### Smoke test from the CLI
+
+```bash
+pnpm tsx scripts/mcp-smoke.ts
+```
+
+Spawns the server as a subprocess (same way Claude Desktop does), lists the tools, and invokes each one.
 
 ## Non-goals (explicit)
 
@@ -122,8 +176,10 @@ src/
 eval/
   labels.ts                        # Ground-truth labels per fixture
   run-eval.ts                      # Eval harness; pnpm eval → eval-results.md
+mcp/
+  server.ts                        # MCP stdio server with 4 read-only tools
 fixtures/notices/                  # 20 synthetic notices (.txt sources, .pdf generated)
-scripts/                           # seed, reset, e2e, smoke, _loadenv
+scripts/                           # seed, reset, e2e, mcp-smoke, fixtures-to-pdf, _loadenv
 ```
 
 ## Credits

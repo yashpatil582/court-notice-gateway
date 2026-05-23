@@ -1,6 +1,6 @@
 # Court Notice Gateway — Eval Results
 
-_Generated: 2026-05-23T18:19:56.471Z_  ·  fixtures: **20** (legit: 16, phishing: 4)  ·  model: `llama-3.3-70b-versatile` via Groq
+_Generated: 2026-05-23T18:32:47.023Z_  ·  fixtures: **20** (legit: 16, phishing: 4)  ·  model: `llama-3.3-70b-versatile` via Groq
 
 ## Headline metrics
 
@@ -12,7 +12,7 @@ _Generated: 2026-05-23T18:19:56.471Z_  ·  fixtures: **20** (legit: 16, phishing
 | Straight-through rate (legit → routed) | **100.0%** | ≥ 60% |
 | Phishing detection recall | **100.0%** | ≥ 95% |
 | Phishing false-positive rate (legit → suspicious) | **0.0%** | ≤ 5% |
-| Median ingest latency (LLM stages) | **9.82s** | < 8s |
+| Median ingest latency (LLM stages) | **2.63s** | < 8s |
 
 ## Field extraction (F1 per field)
 
@@ -31,26 +31,26 @@ _Generated: 2026-05-23T18:19:56.471Z_  ·  fixtures: **20** (legit: 16, phishing
 
 | Fixture | Case | Type | Status | Conf. | Lat (s) | Errors |
 | --- | --- | --- | --- | ---: | ---: | --- |
-| `341-meeting-inperson-txsb` | ✓ 25-30412 | ✓ meeting_341 | ✓ routed | 95% | 1.4 |  |
-| `341-meeting-legit` | ✓ 25-12345 | ✓ meeting_341 | ✓ routed | 95% | 1.1 |  |
-| `341-meeting-rescheduled-flsb` | ✓ 25-18077 | ✓ meeting_341 | ✓ routed | 95% | 1.0 |  |
-| `341-meeting-zoom-cacb-ch13` | ✓ 25-22890 | ✓ meeting_341 | ✓ routed | 95% | 1.1 |  |
-| `claim-deadline-amended-mnb` | ✓ 24-32189 | ✓ claim_deadline | ✓ routed | 95% | 1.2 |  |
-| `claim-deadline-bar-date-ncwb` | ✓ 25-50901 | ✓ claim_deadline | ✓ routed | 95% | 1.0 |  |
-| `deficiency-fees-mieb` | ✓ 25-41229 | ✓ deficiency | ✓ routed | 95% | 10.5 |  |
-| `deficiency-legit` | ✓ 25-44321 | ✓ deficiency | ✓ routed | 95% | 9.5 |  |
-| `deficiency-schedules-ganb` | ✓ 25-55104 | ✓ deficiency | ✓ routed | 95% | 10.1 |  |
-| `discharge-ch13-ohnb` | ✓ 22-13456 | ✓ discharge | ✓ routed | 95% | 11.2 |  |
-| `discharge-ch7-vaeb` | ✓ 25-72018 | ✓ discharge | ✓ routed | 95% | 10.1 |  |
-| `discharge-legit` | ✓ 24-09876 | ✓ discharge | ✓ routed | 95% | 9.4 |  |
-| `motion-to-dismiss-failure-disclose-cob` | ✓ 24-58221 | ✓ motion_to_dismiss | ✓ routed | 93% | 11.5 |  |
-| `motion-to-dismiss-trustee-paeb` | ✓ 25-19045 | ✓ motion_to_dismiss | ✓ routed | 95% | 10.4 |  |
+| `341-meeting-inperson-txsb` | ✓ 25-30412 | ✓ meeting_341 | ✓ routed | 91% | 1.3 |  |
+| `341-meeting-legit` | ✓ 25-12345 | ✓ meeting_341 | ✓ routed | 90% | 1.0 |  |
+| `341-meeting-rescheduled-flsb` | ✓ 25-18077 | ✓ meeting_341 | ✓ routed | 90% | 0.9 |  |
+| `341-meeting-zoom-cacb-ch13` | ✓ 25-22890 | ✓ meeting_341 | ✓ routed | 91% | 1.0 |  |
+| `claim-deadline-amended-mnb` | ✓ 24-32189 | ✓ claim_deadline | ✓ routed | 91% | 0.8 |  |
+| `claim-deadline-bar-date-ncwb` | ✓ 25-50901 | ✓ claim_deadline | ✓ routed | 91% | 0.9 |  |
+| `deficiency-fees-mieb` | ✓ 25-41229 | ✓ deficiency | ✓ routed | 91% | 0.9 |  |
+| `deficiency-legit` | ✓ 25-44321 | ✓ deficiency | ✓ routed | 91% | 0.8 |  |
+| `deficiency-schedules-ganb` | ✓ 25-55104 | ✓ deficiency | ✓ routed | 91% | 4.0 |  |
+| `discharge-ch13-ohnb` | ✓ 22-13456 | ✓ discharge | ✓ routed | 87% | 6.9 |  |
+| `discharge-ch7-vaeb` | ✓ 25-72018 | ✓ discharge | ✓ routed | 87% | 8.0 |  |
+| `discharge-legit` | ✓ 24-09876 | ✓ discharge | ✓ routed | 87% | 7.0 |  |
+| `motion-to-dismiss-failure-disclose-cob` | ✓ 24-58221 | ✓ motion_to_dismiss | ✓ routed | 89% | 7.2 |  |
+| `motion-to-dismiss-trustee-paeb` | ✓ 25-19045 | ✓ motion_to_dismiss | ✓ routed | 90% | 8.3 |  |
 | `phishing-fake-nef` | ✓ 25-77777 | ✓ (suspicious) | ✓ suspicious | — | 0.0 |  |
 | `phishing-gmail-clerk` | ✓ 25-99012 | ✓ (suspicious) | ✓ suspicious | — | 0.0 |  |
 | `phishing-pacer-com` | ✓ 25-66677 | ✓ (suspicious) | ✓ suspicious | — | 0.0 |  |
 | `phishing-uscoorts` | ✓ 25-88888 | ✓ (suspicious) | ✓ suspicious | — | 0.0 |  |
-| `relief-from-stay-lease-tnmd` | ✓ 25-26803 | ✓ relief_from_stay | ✓ routed | 95% | 10.6 |  |
-| `relief-from-stay-secured-azb` | ✓ 25-04412 | ✓ relief_from_stay | ✓ routed | 95% | 11.7 |  |
+| `relief-from-stay-lease-tnmd` | ✓ 25-26803 | ✓ relief_from_stay | ✓ routed | 91% | 6.2 |  |
+| `relief-from-stay-secured-azb` | ✓ 25-04412 | ✓ relief_from_stay | ✓ routed | 91% | 9.3 |  |
 
 ## Methodology
 

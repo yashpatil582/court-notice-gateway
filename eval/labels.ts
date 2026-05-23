@@ -16,7 +16,7 @@
  *     by deterministic checks before the LLM runs.
  */
 
-import type { NoticeType } from '../src/lib/notice-pipeline/classify';
+import type { NoticeType } from '../src/lib/notice-pipeline/analyse';
 
 export type ExpectedFields = {
   hearingAt: string | null;

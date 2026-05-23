@@ -11,21 +11,16 @@ import { join } from 'node:path';
 import { put } from '@vercel/blob';
 import { extractPdfText } from '../src/lib/parsing';
 import { ingestNotice } from '../src/lib/notice-pipeline/run';
+import { LABELS } from '../eval/labels';
 
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures', 'notices');
 
-type Expected = {
-  status: 'received' | 'suspicious' | 'routed' | 'needs_review';
-  type?: string;
-};
-
-const EXPECTATIONS: Record<string, Expected> = {
-  '341-meeting-legit.pdf': { status: 'routed', type: 'meeting_341' },
-  'deficiency-legit.pdf': { status: 'routed', type: 'deficiency' },
-  'discharge-legit.pdf': { status: 'routed', type: 'discharge' },
-  'phishing-fake-nef.pdf': { status: 'suspicious' },
-  'phishing-uscoorts.pdf': { status: 'suspicious' },
-};
+function expectationFor(filename: string) {
+  const stem = filename.replace(/\.pdf$/, '');
+  const label = LABELS[stem];
+  if (!label) return null;
+  return { status: label.expectedStatus, type: label.expectedType ?? undefined };
+}
 
 function extractHeader(content: string, name: string): string | null {
   const re = new RegExp(`^${name}:\\s*(.+)$`, 'mi');
@@ -53,7 +48,11 @@ async function main() {
   let pass = 0;
   let fail = 0;
   for (const file of pdfs) {
-    const expected = EXPECTATIONS[file];
+    const expected = expectationFor(file);
+    if (!expected) {
+      console.log(`?  ${file}  (no label — skipping)`);
+      continue;
+    }
     const txtPath = join(FIXTURES_DIR, file.replace(/\.pdf$/, '.txt'));
     const senderEmail = (() => {
       try {

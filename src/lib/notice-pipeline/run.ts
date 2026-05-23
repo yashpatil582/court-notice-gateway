@@ -3,12 +3,11 @@
  *
  * Stages, in order:
  *   1. Deterministic — case-number regex, sender allowlist, link host validation
- *   2. Classification — Groq tool-use returns notice type + confidence
- *   3. Extraction — Groq tool-use returns operative fields + per-field confidences
- *   4. Routing — aggregate confidence, decide between routed | needs_review
+ *   2. LLM analyse — single combined classify + extract tool call
+ *   3. Routing — aggregate confidence, decide between routed | needs_review
  *
  * The deterministic stage can short-circuit with `suspicious` and skip LLM
- * work entirely (which also saves Groq tokens).
+ * work entirely (saves Groq tokens and tightens the trust boundary).
  *
  * Every LLM call is persisted as a ParseRun row so we can audit cost, latency,
  * raw output, and which prompt produced which result.
@@ -17,8 +16,7 @@
 import { db, schema } from '@/db';
 import { analyseNotice } from '../parsing';
 import { findOrCreateCase } from '../case-lookup';
-import { classifyNotice } from './classify';
-import { extractNoticeFields, aggregateConfidence } from './extract';
+import { analyseNoticeLlm, aggregateConfidence } from './analyse';
 
 const REVIEW_THRESHOLD = Number(process.env.REVIEW_CONFIDENCE_THRESHOLD ?? 0.75);
 
@@ -81,20 +79,12 @@ export async function ingestNotice(input: IngestInput): Promise<IngestResult> {
     };
   }
 
-  // Classification stage
-  const classify = await classifyNotice(input.text);
+  const llm = await analyseNoticeLlm(input.text);
 
-  // Extraction stage
-  const extract = await extractNoticeFields(input.text, classify.data.type);
-
-  const overallConfidence = aggregateConfidence(
-    extract.data,
-    Boolean(caseId),
-    classify.data.confidence,
-  );
+  const overallConfidence = aggregateConfidence(llm.data, Boolean(caseId));
 
   const status: 'routed' | 'needs_review' =
-    overallConfidence >= REVIEW_THRESHOLD && classify.data.type !== 'unknown'
+    overallConfidence >= REVIEW_THRESHOLD && llm.data.type !== 'unknown'
       ? 'routed'
       : 'needs_review';
 
@@ -103,62 +93,49 @@ export async function ingestNotice(input: IngestInput): Promise<IngestResult> {
     .values({
       caseId,
       source: 'pdf',
-      type: classify.data.type,
+      type: llm.data.type,
       status,
       rawText: input.text,
       rawFileUrl: input.rawFileUrl,
       senderEmail: input.senderEmail ?? null,
       senderDomain: analysis.sender?.domain ?? null,
       confidence: overallConfidence,
-      classificationReasoning: classify.data.reasoning,
+      classificationReasoning: llm.data.classifyReasoning,
     })
     .returning({ id: schema.notices.id });
 
-  const hearingAt = parseIso(extract.data.hearingAt);
-  const deadline = parseIso(extract.data.deadline);
+  const hearingAt = parseIso(llm.data.hearingAt);
+  const deadline = parseIso(llm.data.deadline);
 
   await db.insert(schema.extractedEvents).values({
     noticeId: notice.id,
-    type: classify.data.type,
+    type: llm.data.type,
     hearingAt,
-    courtroom: extract.data.courtroom,
-    virtualUrl: extract.data.virtualUrl,
-    trustee: extract.data.trustee,
-    judge: extract.data.judge,
+    courtroom: llm.data.courtroom,
+    virtualUrl: llm.data.virtualUrl,
+    trustee: llm.data.trustee,
+    judge: llm.data.judge,
     deadline,
-    docketSummary: extract.data.docketSummary,
-    fieldConfidences: extract.data.fieldConfidences,
+    docketSummary: llm.data.docketSummary,
+    fieldConfidences: llm.data.fieldConfidences,
   });
 
-  // Persist both LLM calls for audit / eval reproducibility.
-  await db.insert(schema.parseRuns).values([
-    {
-      noticeId: notice.id,
-      model: classify.model,
-      stage: 'classify',
-      prompt: classify.rawArgs,
-      rawOutput: classify.data,
-      durationMs: classify.durationMs,
-      inputTokens: classify.usage.inputTokens,
-      outputTokens: classify.usage.outputTokens,
-    },
-    {
-      noticeId: notice.id,
-      model: extract.model,
-      stage: 'extract',
-      prompt: extract.rawArgs,
-      rawOutput: extract.data,
-      durationMs: extract.durationMs,
-      inputTokens: extract.usage.inputTokens,
-      outputTokens: extract.usage.outputTokens,
-    },
-  ]);
+  await db.insert(schema.parseRuns).values({
+    noticeId: notice.id,
+    model: llm.model,
+    stage: 'analyse',
+    prompt: llm.rawArgs,
+    rawOutput: llm.data,
+    durationMs: llm.durationMs,
+    inputTokens: llm.usage.inputTokens,
+    outputTokens: llm.usage.outputTokens,
+  });
 
   await writeAudit(notice.id, 'ingested', {
     verdict: 'continue',
     caseNumber: analysis.caseNumber?.caseNumber ?? null,
-    type: classify.data.type,
-    classifyConfidence: classify.data.confidence,
+    type: llm.data.type,
+    classifyConfidence: llm.data.classifyConfidence,
     overallConfidence,
     status,
     reasons: analysis.reasons,
@@ -168,7 +145,7 @@ export async function ingestNotice(input: IngestInput): Promise<IngestResult> {
     noticeId: notice.id,
     status,
     caseNumber: analysis.caseNumber?.caseNumber ?? null,
-    type: classify.data.type,
+    type: llm.data.type,
     confidence: overallConfidence,
     hearingAt,
     deterministicReasons: analysis.reasons,
