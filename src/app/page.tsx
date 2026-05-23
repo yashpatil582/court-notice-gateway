@@ -134,7 +134,13 @@ export default async function InboxPage() {
               {notices.map((n) => (
                 <TableRow key={n.id}>
                   <TableCell className="font-mono text-xs">
-                    {n.caseNumber ?? "—"}
+                    {n.caseNumber ? (
+                      <Link href={`/cases/${n.caseNumber}`} className="hover:underline">
+                        {n.caseNumber}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
                   </TableCell>
                   <TableCell className="text-sm">
                     {n.type ? TYPE_LABEL[n.type] ?? n.type : "—"}
@@ -150,8 +156,13 @@ export default async function InboxPage() {
                   <TableCell className="text-xs text-muted-foreground">
                     {fmtHearing(n.hearingAt)}
                   </TableCell>
-                  <TableCell className="text-right text-xs text-muted-foreground">
-                    {fmtTimestamp(n.receivedAt)}
+                  <TableCell className="text-right text-xs">
+                    <div className="flex flex-col items-end gap-1">
+                      <Link href={`/notices/${n.id}`} className="font-medium hover:underline">
+                        Open →
+                      </Link>
+                      <span className="text-muted-foreground">{fmtTimestamp(n.receivedAt)}</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
