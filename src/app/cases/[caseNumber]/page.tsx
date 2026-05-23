@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { asc, desc, eq } from 'drizzle-orm';
 import { Badge } from '@/components/ui/badge';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { db, schema } from '@/db';
@@ -77,15 +78,23 @@ export default async function CaseTimelinePage(props: PageProps<'/cases/[caseNum
       <Link href="/" className="text-xs text-muted-foreground hover:underline">
         ← Back to inbox
       </Link>
-      <header className="pb-6 pt-2">
-        <h1 className="text-2xl font-semibold tracking-tight font-mono">
-          {theCase.caseNumber}
-        </h1>
-        <div className="text-sm text-muted-foreground mt-1">
-          {theCase.debtorName ? `${theCase.debtorName} · ` : ''}
-          {theCase.district ? `District ${theCase.district} · ` : ''}
-          {theCase.chapter ? `Chapter ${theCase.chapter}` : ''}
+      <header className="pb-6 pt-2 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight font-mono">
+            {theCase.caseNumber}
+          </h1>
+          <div className="text-sm text-muted-foreground mt-1">
+            {theCase.debtorName ? `${theCase.debtorName} · ` : ''}
+            {theCase.district ? `District ${theCase.district} · ` : ''}
+            {theCase.chapter ? `Chapter ${theCase.chapter}` : ''}
+          </div>
         </div>
+        <a
+          href={`/api/cases/${theCase.caseNumber}/calendar.ics`}
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          Download .ics
+        </a>
       </header>
 
       <div className="grid grid-cols-3 gap-6">

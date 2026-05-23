@@ -12,7 +12,7 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 
 ## Status
 
-**Day 6 of 7 — MCP server live, latency cut from 9.8s → 2.6s, eval all-green.**
+**Day 7 of 7 — feature-complete. Ready for deploy.**
 
 - [x] Next.js 16 + TypeScript + Tailwind 4 + shadcn/ui (Day 1)
 - [x] Drizzle ORM schema (10 tables / 6 enums) (Day 1)
@@ -23,9 +23,16 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 - [x] Approve/Reject/Save actions; auto-generates a follow-up Task on approve (Day 4)
 - [x] Case timeline page; Review Queue page (Day 4)
 - [x] Eval harness with reproducible metrics → [eval-results.md](./eval-results.md) (Day 5)
-- [x] **Combined classify+extract into single LLM call — 73% latency reduction** (Day 6)
-- [x] **MCP server (stdio) with 4 read-only tools — connectable from Claude Desktop** (Day 6)
-- [ ] ICS calendar export + Loom walkthrough + Vercel deploy (Day 7)
+- [x] Combined classify+extract into single LLM call — 73% latency reduction (Day 6)
+- [x] MCP server (stdio) with 4 read-only tools — connectable from Claude Desktop (Day 6)
+- [x] **ICS calendar export per case + live Metrics page reading eval results** (Day 7)
+- [x] **DESIGN.md, DEMO.md, DEPLOY.md** (Day 7)
+
+**Hosted:** _link added after deploy_  ·  **Walkthrough:** _Loom link added after recording_
+
+See **[DESIGN.md](./DESIGN.md)** for non-obvious decisions and what I'd build next.
+See **[DEMO.md](./DEMO.md)** for the 4-minute walkthrough script.
+See **[DEPLOY.md](./DEPLOY.md)** for Vercel deploy steps.
 
 ## Eval at a glance
 
@@ -44,6 +51,32 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 Full per-fixture breakdown and per-field precision/recall in [eval-results.md](./eval-results.md). Reproduce with `pnpm eval`.
 
 > The eval set is synthetic but modeled on official forms (309A, 122A, B 318, etc.). Real PACER / BNC samples need to be added before any external claim — the README will be updated when that happens.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Forwarded notice<br/>PDF or email] --> B[Vercel Blob<br/>private]
+    A --> C[unpdf<br/>text extraction]
+    C --> D{Deterministic<br/>checks}
+    D -->|case # regex| D
+    D -->|sender allowlist| D
+    D -->|link host check| D
+    D -->|suspicious| Q[(suspicious<br/>quarantine)]
+    D -->|continue| E[Groq llama-3.3-70b<br/>analyse_notice tool]
+    E --> F{Confidence<br/>≥ 0.75?}
+    F -->|yes| R[(routed)]
+    F -->|no / type=unknown| RV[(needs_review)]
+    R --> T[Auto-generated Task<br/>case timeline]
+    RV --> P[Paralegal review<br/>side-by-side PDF + fields]
+    P -->|approve| T
+    P -->|reject| Q
+    T --> ICS[.ics calendar export]
+    T --> MCP[MCP server<br/>4 read-only tools]
+    MCP --> CD[Claude Desktop /<br/>ChatGPT / other]
+```
+
+Every step writes to `audit_events`. Every LLM call is captured as a `parse_runs` row (model, prompt, raw output, latency, tokens) so the eval is reproducible and the audit trail is complete.
 
 ## Stack and why
 
@@ -181,6 +214,17 @@ mcp/
 fixtures/notices/                  # 20 synthetic notices (.txt sources, .pdf generated)
 scripts/                           # seed, reset, e2e, mcp-smoke, fixtures-to-pdf, _loadenv
 ```
+
+## What I'd build next
+
+- **Tune courtroom extraction** (weakest at 83% F1 — district-specific few-shot template).
+- **Stream the LLM output** to the Review UI so perceived latency drops further.
+- **MCP write surface, gated** — `approve_notice`, `update_extracted_field` with audit + role check.
+- **Inngest background worker** so ingest doesn't sit in the request path at higher volumes.
+- **Email ingest** via Resend inbound webhooks (the pipeline already accepts arbitrary text).
+- **Real PACER sample notices** in the eval set so the numbers reflect production document shapes.
+
+More detail in [DESIGN.md](./DESIGN.md).
 
 ## Credits
 
