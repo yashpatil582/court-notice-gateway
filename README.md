@@ -28,7 +28,7 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 - [x] **ICS calendar export per case + live Metrics page reading eval results** (Day 7)
 - [x] **DESIGN.md, DEMO.md, DEPLOY.md** (Day 7)
 
-**Hosted:** <https://court-notice-gateway.vercel.app>  ·  **Walkthrough:** _Loom link added after recording_
+**Hosted:** <https://court-notice-gateway.vercel.app> (auto-deploys on push to `main`)  ·  **Walkthrough:** _Loom link added after recording_
 
 See **[DESIGN.md](./DESIGN.md)** for non-obvious decisions and what I'd build next.
 See **[DEMO.md](./DEMO.md)** for the 4-minute walkthrough script.
