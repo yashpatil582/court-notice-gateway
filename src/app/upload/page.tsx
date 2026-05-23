@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { UploadForm } from './upload-form';
 
 export default function UploadPage() {
   return (
@@ -10,11 +10,7 @@ export default function UploadPage() {
           validated, classified, and routed.
         </p>
       </header>
-      <Card>
-        <CardContent className="py-16 text-center text-sm text-muted-foreground">
-          PDF upload + ingestion pipeline lands Day 2.
-        </CardContent>
-      </Card>
+      <UploadForm />
     </div>
   );
 }

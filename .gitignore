@@ -37,6 +37,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Generated PDF fixtures (sources are .txt, regenerate via scripts/fixtures-to-pdf.ts)
+fixtures/notices/*.pdf
+
+# local uploads
+/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

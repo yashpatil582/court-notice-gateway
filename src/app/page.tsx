@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { desc, eq } from "drizzle-orm";
+
+export const dynamic = 'force-dynamic';
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,16 +13,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { db, schema } from "@/db";
 
-type NoticeRow = {
-  id: string;
-  caseNumber: string | null;
-  type: string | null;
-  status: "received" | "parsing" | "needs_review" | "routed" | "suspicious" | "failed";
-  receivedAt: string;
-};
+type StatusKey = "received" | "parsing" | "needs_review" | "routed" | "suspicious" | "failed";
 
-const STATUS_LABEL: Record<NoticeRow["status"], string> = {
+const STATUS_LABEL: Record<StatusKey, string> = {
   received: "Received",
   parsing: "Parsing",
   needs_review: "Needs review",
@@ -28,7 +26,7 @@ const STATUS_LABEL: Record<NoticeRow["status"], string> = {
   failed: "Failed",
 };
 
-const STATUS_VARIANT: Record<NoticeRow["status"], "default" | "secondary" | "destructive" | "outline"> = {
+const STATUS_VARIANT: Record<StatusKey, "default" | "secondary" | "destructive" | "outline"> = {
   received: "secondary",
   parsing: "secondary",
   needs_review: "default",
@@ -37,9 +35,39 @@ const STATUS_VARIANT: Record<NoticeRow["status"], "default" | "secondary" | "des
   failed: "destructive",
 };
 
-async function getNotices(): Promise<NoticeRow[]> {
-  // Day 1: empty state. DB wiring lands in Day 2 once DATABASE_URL is set.
-  return [];
+const TYPE_LABEL: Record<string, string> = {
+  meeting_341: "341 Meeting",
+  deficiency: "Deficiency",
+  motion_to_dismiss: "Motion to Dismiss",
+  discharge: "Discharge",
+  relief_from_stay: "Relief from Stay",
+  claim_deadline: "Claim Deadline",
+  unknown: "Unknown",
+};
+
+function fmtTimestamp(ts: Date | string): string {
+  const d = typeof ts === "string" ? new Date(ts) : ts;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+async function getNotices() {
+  return db
+    .select({
+      id: schema.notices.id,
+      type: schema.notices.type,
+      status: schema.notices.status,
+      receivedAt: schema.notices.receivedAt,
+      caseNumber: schema.cases.caseNumber,
+    })
+    .from(schema.notices)
+    .leftJoin(schema.cases, eq(schema.notices.caseId, schema.cases.id))
+    .orderBy(desc(schema.notices.receivedAt))
+    .limit(100);
 }
 
 export default async function InboxPage() {
@@ -89,14 +117,14 @@ export default async function InboxPage() {
                   <TableCell className="font-mono text-xs">
                     {n.caseNumber ?? "—"}
                   </TableCell>
-                  <TableCell>{n.type ?? "—"}</TableCell>
+                  <TableCell>{n.type ? TYPE_LABEL[n.type] ?? n.type : "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[n.status]}>
-                      {STATUS_LABEL[n.status]}
+                    <Badge variant={STATUS_VARIANT[n.status as StatusKey]}>
+                      {STATUS_LABEL[n.status as StatusKey]}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground">
-                    {n.receivedAt}
+                    {fmtTimestamp(n.receivedAt)}
                   </TableCell>
                 </TableRow>
               ))}
