@@ -1,6 +1,6 @@
 # Court Notice Gateway
 
-A production-style ingestion layer for U.S. bankruptcy court notices. Forwarded PACER / CM-ECF notices come in (email or PDF), get validated for authenticity, classified, structured, and routed to the right case as timeline events, tasks, and calendar entries — with low-confidence extractions routed to a paralegal for review.
+A production-style ingestion layer for U.S. bankruptcy court notices. Forwarded PACER / CM-ECF notice PDFs come in (forwarded-email PDFs preserve the original `From:` header, which the deterministic stage uses), get validated for authenticity, classified, structured, and routed to the right case as timeline events, tasks, and calendar entries — with low-confidence extractions routed to a paralegal for review.
 
 Built as the take-home for the [Glade.ai](https://glade.ai) Forward Deployed Engineer application.
 
@@ -94,8 +94,9 @@ Every step writes to `audit_events`. Every LLM call is captured as a `parse_runs
 **Design principles:**
 - Deterministic rules first (case number regex, sender allowlist, link host validation). LLM only for classification and extraction.
 - Suspicious notices short-circuit the LLM entirely — saves tokens, hardens the trust boundary.
-- Every parse run + every reviewer edit is written to an audit log (`audit_events` table).
-- Low-confidence extractions never auto-route — they sit in a Review Queue with confidence bars per field.
+- A *flagged* (not blocked) sender or an *unknown* link host forces `needs_review` regardless of LLM confidence — the LLM can't grant trust the allowlist didn't.
+- High-confidence routed notices auto-generate the follow-up Task at ingest time. `needs_review` notices wait for the paralegal's approve.
+- Every parse run is persisted as a `parse_runs` row with the full prompt + raw tool output; every reviewer edit / approve / reject writes an `audit_events` row.
 
 ## Run locally
 
@@ -103,7 +104,7 @@ Every step writes to `audit_events`. Every LLM call is captured as a `parse_runs
 pnpm install
 cp .env.local.example .env.local   # fill in DATABASE_URL, GROQ_API_KEY, BLOB_READ_WRITE_TOKEN
 pnpm db:push                       # apply schema to Neon
-pnpm db:seed                       # seed SenderPolicy with known court domains
+pnpm db:seed                       # optional — seeds SenderPolicy reference data (parser uses hard-coded lists today)
 pnpm dev                           # → http://localhost:3000
 ```
 

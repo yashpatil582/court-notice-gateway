@@ -3,6 +3,11 @@
  *
  * Idempotent — safe to run multiple times. Conflicts on (domain) are ignored.
  *
+ * Note: the deterministic parser currently uses a hard-coded allowlist /
+ * blocklist in src/lib/parsing/sender.ts. This seed exists for the planned
+ * DB-driven policy lookup (so a firm admin can edit the list via the UI
+ * without a deploy). Until that lands, the rows here are reference data.
+ *
  * Run: `pnpm db:seed`
  */
 import './_loadenv';
@@ -44,6 +49,10 @@ async function main() {
     sql`select count(*)::int as count from sender_policies`,
   );
   console.log(`seeded ${upserted} sender policy rules; total in DB: ${count}`);
+  console.log(
+    'note: the parser currently uses the hard-coded lists in src/lib/parsing/sender.ts;\n' +
+      '      DB-driven lookup is a planned follow-up (see DESIGN.md).',
+  );
   process.exit(0);
 }
 

@@ -17,6 +17,7 @@ import { db, schema } from '@/db';
 import { analyseNotice } from '../parsing';
 import { findOrCreateCase } from '../case-lookup';
 import { analyseNoticeLlm, aggregateConfidence } from './analyse';
+import { buildTaskTitle, taskDueDate } from './task';
 
 const REVIEW_THRESHOLD = Number(process.env.REVIEW_CONFIDENCE_THRESHOLD ?? 0.75);
 
@@ -83,8 +84,13 @@ export async function ingestNotice(input: IngestInput): Promise<IngestResult> {
 
   const overallConfidence = aggregateConfidence(llm.data, Boolean(caseId));
 
+  // A deterministic requiresReview signal (e.g. flagged sender) overrides
+  // any LLM confidence — the LLM cannot grant trust the sender allowlist
+  // didn't already give.
   const status: 'routed' | 'needs_review' =
-    overallConfidence >= REVIEW_THRESHOLD && llm.data.type !== 'unknown'
+    !analysis.requiresReview &&
+    overallConfidence >= REVIEW_THRESHOLD &&
+    llm.data.type !== 'unknown'
       ? 'routed'
       : 'needs_review';
 
@@ -120,12 +126,30 @@ export async function ingestNotice(input: IngestInput): Promise<IngestResult> {
     fieldConfidences: llm.data.fieldConfidences,
   });
 
+  // Notices that auto-route (high confidence + no deterministic flags) get
+  // their follow-up Task created immediately. needs_review notices wait for
+  // the paralegal to approve them.
+  if (status === 'routed' && caseId) {
+    const event = { hearingAt, deadline, trustee: llm.data.trustee };
+    await db.insert(schema.tasks).values({
+      caseId,
+      noticeId: notice.id,
+      title: buildTaskTitle(llm.data.type, event),
+      description: llm.data.docketSummary,
+      dueAt: taskDueDate(event),
+      assignee: 'auto-route',
+      status: 'open',
+    });
+  }
+
   await db.insert(schema.parseRuns).values({
     noticeId: notice.id,
     model: llm.model,
     stage: 'analyse',
-    prompt: llm.rawArgs,
-    rawOutput: llm.data,
+    // Persist the actual prompt + raw tool args so a reviewer can reconstruct
+    // exactly what was asked and what came back, not just the parsed result.
+    prompt: `[system]\n${llm.prompt.system}\n\n[user]\n${llm.prompt.user}\n\n[tool=${llm.prompt.toolName}]`,
+    rawOutput: { args: llm.rawArgs, parsed: llm.data },
     durationMs: llm.durationMs,
     inputTokens: llm.usage.inputTokens,
     outputTokens: llm.usage.outputTokens,

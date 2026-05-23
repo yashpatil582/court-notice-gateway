@@ -80,7 +80,8 @@ async function main() {
       if (result.deterministicReasons.length) {
         console.log(`    reasons:  ${result.deterministicReasons.join('; ')}`);
       }
-      ok ? pass++ : fail++;
+      if (ok) pass++;
+      else fail++;
     } catch (err) {
       console.error(`✗ ${file}: ${err instanceof Error ? err.message : err}`);
       fail++;

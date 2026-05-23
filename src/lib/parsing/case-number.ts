@@ -29,8 +29,10 @@ export type CaseNumberMatch = {
   end: number;
 };
 
-const FULL_FORM = /\b(\d{1,2}):(\d{2})-(bk|ap)-(\d{4,7})(?:-([A-Z]{2,3}))?\b/g;
-const SHORT_FORM = /\b(\d{2})-(\d{4,7})(?:-([A-Z]{2,3}))?\b/g;
+// Case-insensitive on the proceeding (bk/ap) and judge initials because
+// notices from different districts vary on capitalization (1:25-BK-12345).
+const FULL_FORM = /\b(\d{1,2}):(\d{2})-(bk|ap)-(\d{4,7})(?:-([A-Z]{2,3}))?\b/gi;
+const SHORT_FORM = /\b(\d{2})-(\d{4,7})(?:-([A-Z]{2,3}))?\b/gi;
 
 export function extractCaseNumbers(text: string): CaseNumberMatch[] {
   const matches: CaseNumberMatch[] = [];
@@ -45,9 +47,9 @@ export function extractCaseNumbers(text: string): CaseNumberMatch[] {
     matches.push({
       caseNumber: canonical,
       raw,
-      proceeding: proceeding as 'bk' | 'ap',
+      proceeding: proceeding.toLowerCase() as 'bk' | 'ap',
       district,
-      judge: judge ?? null,
+      judge: judge ? judge.toUpperCase() : null,
       start: m.index!,
       end: m.index! + raw.length,
     });
@@ -73,7 +75,7 @@ export function extractCaseNumbers(text: string): CaseNumberMatch[] {
       raw,
       proceeding: 'unknown',
       district: null,
-      judge: judge ?? null,
+      judge: judge ? judge.toUpperCase() : null,
       start: m.index!,
       end: m.index! + raw.length,
     });

@@ -66,5 +66,10 @@ export async function runToolGroq<T>(opts: RunToolOptions<T>): Promise<RunToolRe
     model,
     provider: 'groq',
     rawArgs,
+    prompt: {
+      system: opts.system,
+      user: opts.user,
+      toolName: opts.tool.name,
+    },
   };
 }

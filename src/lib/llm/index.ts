@@ -42,8 +42,14 @@ export interface RunToolResult<T> {
   durationMs: number;
   model: string;
   provider: LlmProvider;
-  /** Raw tool-call arguments JSON string — stored in ParseRun for audit */
+  /** Raw tool-call arguments JSON string — stored in ParseRun.rawOutput for audit */
   rawArgs: string;
+  /** The actual prompt sent (system + user) — stored in ParseRun.prompt for audit */
+  prompt: {
+    system: string;
+    user: string;
+    toolName: string;
+  };
 }
 
 export async function runTool<T>(opts: RunToolOptions<T>): Promise<RunToolResult<T>> {

@@ -57,4 +57,32 @@ describe('analyseNotice', () => {
     expect(result.verdict).toBe('continue');
     expect(result.sender).toBeNull();
   });
+
+  it('sets requiresReview when the sender is flagged (free email)', () => {
+    // Free email senders are flagged, not blocked — the LLM must not be
+    // able to auto-route the notice no matter how confident.
+    const result = analyseNotice({
+      text: LEGIT_341_TEXT,
+      senderEmail: 'court.clerk@gmail.com',
+    });
+    expect(result.verdict).toBe('continue');
+    expect(result.sender?.trust).toBe('flag');
+    expect(result.requiresReview).toBe(true);
+    expect(result.reasons.some((r) => r.includes('sender flagged'))).toBe(true);
+  });
+
+  it('sets requiresReview when a link cannot be classified (unknown host)', () => {
+    const text = 'Case 25-12345 — see https://some-firm.example/notice.pdf for the order.';
+    const result = analyseNotice({ text });
+    expect(result.verdict).toBe('continue');
+    expect(result.requiresReview).toBe(true);
+  });
+
+  it('does NOT set requiresReview when sender is allowed and all links are court-system', () => {
+    const result = analyseNotice({
+      text: LEGIT_341_TEXT,
+      senderEmail: 'ecf_help@nysb.uscourts.gov',
+    });
+    expect(result.requiresReview).toBe(false);
+  });
 });

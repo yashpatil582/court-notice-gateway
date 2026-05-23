@@ -33,7 +33,11 @@ export async function uploadNotice(_prev: UploadResult | null, formData: FormDat
     await ingestNotice({
       text,
       rawFileUrl: blob.url,
-      senderEmail: null,
+      // Forwarded-email PDFs carry the original sender in a "From:" header
+      // (this is how paralegals route them to the firm inbox). If present,
+      // feed it to the deterministic sender allowlist; otherwise leave null
+      // and let the link-host check carry the trust signal.
+      senderEmail: extractFromHeader(text),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error during upload';
@@ -43,4 +47,12 @@ export async function uploadNotice(_prev: UploadResult | null, formData: FormDat
 
   revalidatePath('/');
   redirect('/');
+}
+
+function extractFromHeader(text: string): string | null {
+  const m = text.match(/^From:\s*(.+)$/im);
+  if (!m) return null;
+  // The line may contain a name + angle-bracket email; pull just the address.
+  const addr = m[1].match(/<([^>]+)>/);
+  return (addr ? addr[1] : m[1]).trim() || null;
 }

@@ -54,6 +54,14 @@ describe('extractCaseNumbers', () => {
     const matches = extractCaseNumbers(text);
     expect(matches).toHaveLength(0);
   });
+
+  it('matches case-insensitive bk/ap and uppercases the judge initials', () => {
+    const text = 'In re: Case 1:25-BK-12345-abc';
+    const matches = extractCaseNumbers(text);
+    expect(matches).toHaveLength(1);
+    expect(matches[0].proceeding).toBe('bk');
+    expect(matches[0].judge).toBe('ABC');
+  });
 });
 
 describe('pickPrimaryCaseNumber', () => {

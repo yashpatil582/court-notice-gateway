@@ -37,6 +37,20 @@ function toDateInput(iso: string | null): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
+/**
+ * Convert a datetime-local input value (timezone-naive) back to an ISO-8601
+ * string in the *browser's* timezone. The server stores ISO-8601 with offset,
+ * so we must include the offset before posting — otherwise the server's
+ * `new Date(...)` would interpret the string in the server's timezone
+ * (UTC on Vercel) and a Pacific user editing 7am PT would store 7am UTC.
+ */
+function datetimeLocalToIso(local: string): string {
+  // `new Date('YYYY-MM-DDTHH:MM')` is parsed in the local TZ. Calling
+  // `.toISOString()` then produces the correct UTC instant.
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+}
+
 export function ReviewForm({
   noticeId,
   initial,
@@ -88,7 +102,14 @@ export function ReviewForm({
 
   const buildFormData = (): FormData => {
     const fd = new FormData();
-    Object.entries(state).forEach(([k, v]) => fd.append(k, v));
+    // Convert the datetime-local hearing value back to ISO with the browser's
+    // timezone offset so the server stores the correct UTC instant.
+    const hearingIso = state.hearingAt ? datetimeLocalToIso(state.hearingAt) : '';
+    fd.append('hearingAt', hearingIso);
+    for (const [k, v] of Object.entries(state)) {
+      if (k === 'hearingAt') continue;
+      fd.append(k, v);
+    }
     return fd;
   };
 

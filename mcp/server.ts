@@ -72,6 +72,9 @@ server.tool(
           isNotNull(schema.extractedEvents.hearingAt),
           gt(schema.extractedEvents.hearingAt, now),
           lt(schema.extractedEvents.hearingAt, horizon),
+          // Only routed notices appear in hearing lists — same trust
+          // boundary as the ICS calendar export.
+          eq(schema.notices.status, 'routed'),
         ),
       )
       .orderBy(asc(schema.extractedEvents.hearingAt))
@@ -87,7 +90,7 @@ server.tool(
 
 server.tool(
   'get_case_notice_timeline',
-  'Fetch every notice, hearing, and follow-up task on a single bankruptcy case in chronological order.',
+  'Fetch every notice, hearing, and follow-up task on a single bankruptcy case. Notices are returned newest-first; tasks are returned soonest-due-first.',
   {
     caseNumber: z
       .string()

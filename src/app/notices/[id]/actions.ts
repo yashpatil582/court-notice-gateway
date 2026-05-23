@@ -1,9 +1,10 @@
 'use server';
 
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db, schema } from '@/db';
+import { buildTaskTitle, taskDueDate } from '@/lib/notice-pipeline/task';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -133,26 +134,34 @@ export async function approveNotice(noticeId: string, reviewer: string): Promise
 
     if (!notice) return { ok: false, error: 'Notice not found' };
     if (notice.status === 'suspicious') return { ok: false, error: 'Suspicious notices cannot be approved' };
+    if (notice.status === 'routed') return { ok: true }; // already approved — no-op
 
     await db
       .update(schema.notices)
       .set({ status: 'routed' })
       .where(eq(schema.notices.id, noticeId));
 
-    // Generate follow-up Task from extracted event
+    // Generate follow-up Task only if one doesn't already exist (the ingest
+    // path auto-creates a task for high-confidence routes; manual approve
+    // covers the needs_review → routed path).
     const event = await loadEvent(noticeId);
     if (event && notice.caseId) {
-      const taskTitle = buildTaskTitle(notice.type, event);
-      const dueAt = event.deadline ?? event.hearingAt ?? null;
-      await db.insert(schema.tasks).values({
-        caseId: notice.caseId,
-        noticeId,
-        title: taskTitle,
-        description: event.docketSummary,
-        dueAt,
-        assignee: reviewer,
-        status: 'open',
-      });
+      const [existing] = await db
+        .select({ id: schema.tasks.id })
+        .from(schema.tasks)
+        .where(eq(schema.tasks.noticeId, noticeId))
+        .limit(1);
+      if (!existing) {
+        await db.insert(schema.tasks).values({
+          caseId: notice.caseId,
+          noticeId,
+          title: buildTaskTitle(notice.type, event),
+          description: event.docketSummary,
+          dueAt: taskDueDate(event),
+          assignee: reviewer,
+          status: 'open',
+        });
+      }
     }
 
     await db.insert(schema.auditEvents).values({
@@ -183,6 +192,13 @@ export async function rejectNotice(
       .set({ status: 'suspicious' })
       .where(eq(schema.notices.id, noticeId));
 
+    // Cancel any tasks the ingest path auto-created. A rejected notice
+    // shouldn't leave dangling work on the case timeline.
+    await db
+      .update(schema.tasks)
+      .set({ status: 'cancelled' })
+      .where(and(eq(schema.tasks.noticeId, noticeId), eq(schema.tasks.status, 'open')));
+
     await db.insert(schema.reviewDecisions).values({
       noticeId,
       reviewerEmail: reviewer,
@@ -203,28 +219,6 @@ export async function rejectNotice(
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'reject failed' };
-  }
-}
-
-function buildTaskTitle(
-  type: string | null,
-  event: { hearingAt: Date | null; deadline: Date | null; trustee: string | null },
-): string {
-  switch (type) {
-    case 'meeting_341':
-      return `Prep for 341 meeting${event.hearingAt ? ` on ${event.hearingAt.toDateString()}` : ''}`;
-    case 'deficiency':
-      return `Cure deficiency${event.deadline ? ` by ${event.deadline.toDateString()}` : ''}`;
-    case 'motion_to_dismiss':
-      return `Respond to motion to dismiss${event.hearingAt ? ` (hearing ${event.hearingAt.toDateString()})` : ''}`;
-    case 'discharge':
-      return `File discharge order to case file`;
-    case 'relief_from_stay':
-      return `Review relief from stay motion${event.hearingAt ? ` (hearing ${event.hearingAt.toDateString()})` : ''}`;
-    case 'claim_deadline':
-      return `Claim bar date${event.deadline ? ` on ${event.deadline.toDateString()}` : ''}`;
-    default:
-      return 'Review notice and file in case';
   }
 }
 

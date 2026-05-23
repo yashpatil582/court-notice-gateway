@@ -5,7 +5,7 @@
  * open task. Paralegals subscribe to this URL in Outlook / Google Calendar
  * and the case stays current as new notices land.
  */
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { db, schema } from '@/db';
 import { buildIcs, type IcsEvent } from '@/lib/ics';
@@ -52,7 +52,14 @@ export async function GET(
     })
     .from(schema.notices)
     .leftJoin(schema.extractedEvents, eq(schema.extractedEvents.noticeId, schema.notices.id))
-    .where(eq(schema.notices.caseId, theCase.id));
+    .where(
+      and(
+        eq(schema.notices.caseId, theCase.id),
+        // Only routed notices populate the calendar — needs_review and
+        // suspicious notices must never reach the paralegal's Outlook.
+        eq(schema.notices.status, 'routed'),
+      ),
+    );
 
   const tasks = await db
     .select()

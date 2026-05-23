@@ -44,8 +44,9 @@ export async function GET(
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    // Log details server-side; surface a generic message to the client so
+    // we don't leak storage provider internals over the wire.
     console.error('PDF proxy error:', err);
-    return new NextResponse(`Upstream blob fetch failed: ${message}`, { status: 502 });
+    return new NextResponse('PDF unavailable', { status: 502 });
   }
 }
