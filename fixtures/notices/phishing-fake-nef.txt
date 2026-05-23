@@ -1,0 +1,17 @@
+From: clerk@uscourts.com
+To: attorney@firm.example
+Subject: NOTICE OF ELECTRONIC FILING - 25-77777 - URGENT ACTION REQUIRED
+
+UNITED STATES BANKRUPTCY COURT
+
+Case Number: 25-77777
+Date Filed: 2026-05-22
+
+A new order has been filed in the above-captioned case. You must download
+and review the attached order immediately. Failure to comply within 24 hours
+will result in sanctions.
+
+DOWNLOAD HERE:
+  http://uscourts.com/secure/download.aspx?case=25-77777&id=8923
+
+This is an automated notice. Do not reply.

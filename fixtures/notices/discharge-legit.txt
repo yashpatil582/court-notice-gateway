@@ -1,0 +1,25 @@
+From: noreply@bnc-mail.com
+To: paralegal@firm.example
+Subject: 24-09876 Discharge of Debtor
+
+UNITED STATES BANKRUPTCY COURT
+NORTHERN DISTRICT OF ILLINOIS
+
+In re: Aaliyah Brooks                           Case No. 1:24-bk-09876-DAC
+Debtor                                          Chapter 7
+
+DISCHARGE OF DEBTOR
+
+It appearing that the debtor is entitled to a discharge, IT IS ORDERED:
+    The debtor is granted a discharge under 11 U.S.C. § 727.
+
+Order entered: May 18, 2026
+Honorable: Diana A. Cortez, U.S. Bankruptcy Judge
+
+EXPLANATION OF BANKRUPTCY DISCHARGE
+This court order grants a discharge to the person named above. Some debts
+are not discharged. Examples: most taxes, most student loans, domestic
+support obligations, and debts for fraud.
+
+Docket: https://ecf.ilnb.uscourts.gov/cgi-bin/Dispatch.pl?778812
+Bankruptcy Noticing Center: https://noticingcenter.com/n/9876

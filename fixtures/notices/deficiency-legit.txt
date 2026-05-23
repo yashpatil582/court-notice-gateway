@@ -1,0 +1,28 @@
+From: ecf_notice@cacb.uscourts.gov
+To: paralegal@firm.example
+Subject: 25-44321 NOTICE OF DEFICIENT FILING
+
+UNITED STATES BANKRUPTCY COURT
+CENTRAL DISTRICT OF CALIFORNIA
+
+In re: Marcus T. Liang                          Case No. 2:25-bk-44321-PAB
+Debtor                                          Chapter 13
+
+NOTICE OF DEFICIENT FILING
+
+The Court has reviewed the petition filed on April 28, 2026 and finds the
+following deficiencies:
+
+  1. Schedule I (Your Income) is missing.
+  2. Statement of Financial Affairs (Form 107) is incomplete — Part 4
+     question 18 is unanswered.
+  3. Chapter 13 Plan (Form 113) was filed but not signed.
+
+Required action:
+  Cure the deficiencies on or before May 12, 2026, or the case may be
+  dismissed without further notice. See Local Bankruptcy Rule 1007-1.
+
+For docket access, visit:
+  https://ecf.cacb.uscourts.gov/cgi-bin/Dispatch.pl?991204
+
+Clerk of the Court, U.S. Bankruptcy Court, C.D. Cal.

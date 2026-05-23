@@ -1,0 +1,14 @@
+From: filings@uscoorts.gov
+To: paralegal@firm.example
+Subject: 25-88888 Court Filing — Action Required
+
+US BANKRUPTCY COURT — DOCUMENT DELIVERY
+
+Your case 25-88888 has a new filing. Please verify your account credentials
+and download the document using the link below.
+
+Verify and download: https://uscoorts.gov/login?return=%2Fdoc%2F25-88888
+
+If you do not respond within 48 hours your filing may be dismissed.
+
+— Court Administrator

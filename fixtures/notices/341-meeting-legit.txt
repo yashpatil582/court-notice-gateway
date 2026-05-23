@@ -1,0 +1,33 @@
+From: ecf_notice@nyeb.uscourts.gov
+To: paralegal@firm.example
+Subject: 25-12345 Notice of Chapter 7 Bankruptcy Case, Meeting of Creditors
+
+UNITED STATES BANKRUPTCY COURT
+EASTERN DISTRICT OF NEW YORK
+
+In re: Jane Q. Doe                              Case No. 1:25-bk-12345-JMP
+Debtor                                          Chapter 7
+
+NOTICE OF CHAPTER 7 BANKRUPTCY CASE, MEETING OF CREDITORS, AND DEADLINES
+
+A bankruptcy case under Chapter 7 of the United States Bankruptcy Code has
+been filed by the debtor listed above.
+
+Meeting of Creditors (11 U.S.C. § 341(a)):
+    Date: June 14, 2026
+    Time: 10:00 AM Eastern
+    Location: Telephonic / Video via Zoomgov
+    Zoom: https://uscourts.zoomgov.com/j/1620345678
+    Meeting ID: 162 034 5678  Passcode: 887766
+    Trustee: Robert J. Whitman
+
+Deadline to file a complaint to determine dischargeability of certain debts:
+    August 13, 2026
+
+Deadline to object to discharge or to challenge dischargeability:
+    August 13, 2026
+
+To view the docket or this notice, visit:
+    https://ecf.nyeb.uscourts.gov/cgi-bin/Dispatch.pl?572384
+
+Clerk's Office, U.S. Bankruptcy Court, Eastern District of New York
