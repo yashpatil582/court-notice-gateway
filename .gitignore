@@ -46,3 +46,6 @@ fixtures/notices/*.pdf
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Internal demo script — not for the public repo
+DEMO.md

@@ -26,12 +26,12 @@ Glade's public surface — bankruptcy practice page, May 2026 blog posts on PACE
 - [x] Combined classify+extract into single LLM call — 73% latency reduction (Day 6)
 - [x] MCP server (stdio) with 4 read-only tools — connectable from Claude Desktop (Day 6)
 - [x] **ICS calendar export per case + live Metrics page reading eval results** (Day 7)
-- [x] **DESIGN.md, DEMO.md, DEPLOY.md** (Day 7)
+- [x] **DESIGN.md, DEPLOY.md** (Day 7)
 
-**Hosted:** <https://court-notice-gateway.vercel.app> (auto-deploys on push to `main`)  ·  **Walkthrough:** _Loom link added after recording_
+**Hosted:** <https://court-notice-gateway.vercel.app> (auto-deploys on push to `main`)
+**Walkthrough:** <https://drive.google.com/file/d/1Z6FRmL8sVUxNTY4WPdOje7RqOmESj4hn/view?usp=sharing>
 
 See **[DESIGN.md](./DESIGN.md)** for non-obvious decisions and what I'd build next.
-See **[DEMO.md](./DEMO.md)** for the 4-minute walkthrough script.
 See **[DEPLOY.md](./DEPLOY.md)** for Vercel deploy steps.
 
 ## Eval at a glance
